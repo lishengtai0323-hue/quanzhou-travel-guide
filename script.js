@@ -13,3 +13,18 @@ if ('IntersectionObserver' in window) {
   }, {rootMargin: '-110px 0px -55% 0px', threshold: 0});
   days.forEach(day => observer.observe(day));
 }
+
+// Retry each failed image once, including failures that happened before this script ran.
+document.querySelectorAll('.day-photo img').forEach(image => {
+  const retry = () => {
+    if (image.dataset.retried === '1') return;
+    image.dataset.retried = '1';
+    setTimeout(() => {
+      const url = new URL(image.src, document.baseURI);
+      url.searchParams.set('retry', '1');
+      image.src = url.href;
+    }, 1000);
+  };
+  image.addEventListener('error', retry);
+  if (image.complete && image.naturalWidth === 0) retry();
+});
